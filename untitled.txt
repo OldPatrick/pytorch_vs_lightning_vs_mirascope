@@ -1,0 +1,6 @@
+uv run --active hello_world.py
+Hello wrold
+
+
+python -m ipykernel install --user --name=my-uv-kernel --display-name "Python (uv)"
+To create ipykernel activate uv venv before
