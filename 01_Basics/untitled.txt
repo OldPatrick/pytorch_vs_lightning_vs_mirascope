@@ -1,0 +1,10 @@
+how dl works
+
+guess a solution
+compute the error and show if it was off or not, and if it was off, how much
+but the third point is the hardest learn from mistakes and guess a better solution
+need a way to describe the mathematical error landscape
+
+derivative for one dimension problems
+
+for multi dimensional ppl tend to call it gradient but its the same as I pointed out already
