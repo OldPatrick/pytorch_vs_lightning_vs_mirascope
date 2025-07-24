@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12.8"
 dependencies = [
+    "altair>=5.5.0",
     "gradio>=5.38.0",
     "ipykernel>=6.29.5",
     "ipython>=9.4.0",
