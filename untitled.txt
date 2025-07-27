@@ -1,6 +1,23 @@
-uv run --active hello_world.py
-Hello wrold
 
+### Usage of uv in general, always use uv in front
+- uv run --active hello_world.py
+Hello World
 
-python -m ipykernel install --user --name=my-uv-kernel --display-name "Python (uv)"
+### INstallment of Jupyter Kernels to use in jupyter, with Visual studo not needed, just one uv venv
+- python -m ipykernel install --user --name=my-uv-kernel --display-name "Python (uv)"
 To create ipykernel activate uv venv before
+
+### Set Policy before activating individual venv  of uv
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+PS C:\Users\Patrick Bormann\Desktop\pytorch_vs_lightning_vs_mirascope> plm\Scripts\activate 
+
+### to convert jupyter notebooks to marimo
+uv run --active marimo convert polars.ipynb -o polary_marimo.py
+
+#### To install a new venv from uv, iit is also possible topin python maybe check it out
+uv venv plm --python=python3.x  
+uv pip install -r pyproject.toml
+
+
+### use marimo extension in vs code
+uv run marimo edit .\polars_marimo.py

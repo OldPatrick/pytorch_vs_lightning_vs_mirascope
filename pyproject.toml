@@ -12,6 +12,7 @@ dependencies = [
     "jupyter>=1.1.1",
     "lightning>=2.5.2",
     "llm>=0.26",
+    "marimo>=0.14.13",
     "matplotlib>=3.10.3",
     "mirascope>=1.25.4",
     "numpy>=2.3.1",
