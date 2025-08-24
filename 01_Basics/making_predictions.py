@@ -26,6 +26,9 @@ optimizer = torch.optim.SGD(model.parameters(), lr=0.0001)
 
 for i in range(40000):
     optimizer.zero_grad() 
+    #Gradients accumulate by default
+    #When you call .backward(), PyTorch adds the computed gradients to the .grad attribute of each parameter. It does not overwrite them.
+    #This is useful for some advanced techniques (like gradient accumulation over multiple batches), but in standard training, you want to compute gradients fresh for each batch.
     outputs = model(X)
     loss = loss_fn(outputs, y)
     loss.backward() 

@@ -21,4 +21,6 @@ dependencies = [
     "torch>=2.7.1",
     "torchvision>=0.22.1",
     "tqdm>=4.67.1",
+    "vegafusion>=2.0.2",
+    "vl-convert-python>=1.8.0",
 ]

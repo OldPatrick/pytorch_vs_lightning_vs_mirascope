@@ -21,3 +21,11 @@ uv pip install -r pyproject.toml
 
 ### use marimo extension in vs code
 uv run marimo edit .\polars_marimo.py
+
+###
+Marimo Python path for VS Code Extension plm/Scripts/python.exe
+
+##show installed package
+uv pip show vegafusion
+
+### export jupyter to marimo:
