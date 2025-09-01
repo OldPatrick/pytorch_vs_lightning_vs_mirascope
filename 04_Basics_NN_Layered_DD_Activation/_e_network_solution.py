@@ -22,6 +22,12 @@ from torch import nn
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score
 
+print(torch.cuda.is_available())
+print(torch.cuda.device_count())
+print(torch.cuda.device(0))
+print(torch.cuda.get_device_name(0))
+
+
 def model_training(X, y):
     for _ in range (0, 200000):
         optimizer.zero_grad() #delete gradients to not accumulate so many values
@@ -89,15 +95,25 @@ print(
 model_training(X_train, y_train)
 model_training(X_val, y_val)
 
-model.eval()
+hidden_model.eval()
+output_model.eval()
 with torch.no_grad():
-    prediction_tr = model(X_train)
-    prediction_v = model(X_val)
-    prediction_tes = model(X_test)
 
-    prediction_tr = nn.functional.sigmoid(prediction_tr) > 0.5  #transform tensors back into a range of 0 and 1
-    prediction_v = nn.functional.sigmoid(prediction_v) > 0.5
-    prediction_tes = nn.functional.sigmoid(prediction_tes) > 0.5
+    outputs_tr = hidden_model(X_train) #hidden_model applied to input
+    outputs_tr = nn.functional.sigmoid(outputs_tr)
+    outputs_tr = output_model(outputs_tr)
+
+    outputs_val = hidden_model(X_val) #hidden_model applied to input
+    outputs_val = nn.functional.sigmoid(outputs_val)
+    outputs_val = output_model(outputs_val)
+
+    outputs_te = hidden_model(X_test) #hidden_model applied to input
+    outputs_te = nn.functional.sigmoid(outputs_te)
+    outputs_te = output_model(outputs_te)
+
+    prediction_tr = nn.functional.sigmoid(outputs_tr) > 0.5  #transform tensors back into a range of 0 and 1
+    prediction_v = nn.functional.sigmoid(outputs_val) > 0.5
+    prediction_tes = nn.functional.sigmoid(outputs_te) > 0.5
 
     print(precision_score(y_train.cpu().numpy(), prediction_tr))
     print(precision_score(y_val.cpu().numpy(), prediction_v))
