@@ -13,6 +13,9 @@
 # toward the minium and in general steps, when walking down he hill, Adam is rolling, but it may overshoot, so it needs to roll back a little big
 # but we can take smaller steps, depending on the parameter how fast its going
 # ADAM: Adaptive Moment Estimation
+
+
+# In general it would be bettrt to give the function a chunk and slice this chunk into train and val and do not fix val beforehand
 import torch
 import polars as pl
 from torch import nn
@@ -28,34 +31,37 @@ print(torch.cuda.get_device_name(0))
 batch_size = 16
 
 def model_training(X_train, y_train, X_val, y_val):
-    end_train = len(X_train)
-    end_val = len(X_val)
-    for i in range (0, 50000):
-        
-        for start_train in range(0, end_train, batch_size):
+    for i in range (0, 20000):   
+        loss_sum = 0
+        for start_train in range(0, len(X_train), batch_size):
+            end_train = start_train + batch_size
+            #if i % 1000 == 0:
+                #print("X_train: ", start_train, end_train)
             
-            print("X_train: ", start_train, end_train)
-
             optimizer.zero_grad() #delete gradients to not accumulate so many values
             outputs = model(X_train[start_train:end_train])
             loss = loss_fn(outputs, y_train[start_train:end_train]) #between prediction and real one
+            loss_sum += loss
             loss.backward() #backpropagation
             optimizer.step() #(into the right/next direction)
 
-            if _ % 1000 == 0:
-                print(loss)
+        if i % 1000 == 0:
+            print(loss_sum)
 
-                model.eval()
-                with torch.no_grad():
-                    for start_val in range(0, end_val, batch_size):
-                        print("X_val: ", start_val, end_val)
-                        val_logits = model(X_val[start_val:end_val])
-                        val_loss = loss_fn(val_logits, y_val[start_val:end_val])
-                print(f"Epoch {_:5d} | train_loss={loss.item():.4f} | val_loss={val_loss.item():.4f}")
+            model.eval()
+            with torch.no_grad():
+                for start_val in range(0, len(X_val), batch_size):
+                    loss_sum_val = 0
+                    end_val = start_val+batch_size
+                    #print("X_val: ", start_val, end_val)
+                    val_logits = model(X_val[start_val:end_val])
+                    val_loss = loss_fn(val_logits, y_val[start_val:end_val])
+                    loss_sum_val += val_loss
+            print(f"Epoch {i:5d} | train_loss={loss_sum.item():.4f} | val_loss={loss_sum_val.item():.4f}")
         
     
 df = pl.read_csv("student_exam_data.csv")
-print(df.head)
+
 df = (
     df
     .rename({
@@ -89,7 +95,7 @@ model = nn.Sequential(
     nn.Linear(10, 1)
 )   
 loss_fn = nn.BCEWithLogitsLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 model_training(X_train, y_train, X_val, y_val)
 
@@ -113,6 +119,6 @@ with torch.no_grad():
     print(precision_score(y_test.cpu().numpy(), prediction_te))
 
     # we are now missing the opportunity to save the model that created for example the lowest val_loss, to use for prediction of test
-
-    brier_train = (prediction_tr -1)**2
+    print(type(prediction_tr), type(y_train))
+    brier_train = torch.mean((prediction_tr.float() - y_train.float())**2) #greater than 0.5 is problematic
     print(brier_train)
