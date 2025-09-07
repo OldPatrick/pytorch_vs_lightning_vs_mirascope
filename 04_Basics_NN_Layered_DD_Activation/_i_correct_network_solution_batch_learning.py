@@ -19,28 +19,39 @@ from torch import nn
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score
 
-#print(torch.cuda.is_available())
-#print(torch.cuda.device_count())
-#print(torch.cuda.device(0))
-#print(torch.cuda.get_device_name(0))
 
+print(torch.cuda.is_available())
+print(torch.cuda.device_count())
+print(torch.cuda.device(0))
+print(torch.cuda.get_device_name(0))
+
+batch_size = 16
 
 def model_training(X_train, y_train, X_val, y_val):
-    for _ in range (0, 50000):
-        optimizer.zero_grad() #delete gradients to not accumulate so many values
-        outputs = model(X_train)
-        loss = loss_fn(outputs, y_train) #between prediction and real one
-        loss.backward() #backpropagation
-        optimizer.step() #(into the right/next direction)
+    end_train = len(X_train)
+    end_val = len(X_val)
+    for i in range (0, 50000):
+        
+        for start_train in range(0, end_train, batch_size):
+            
+            print("X_train: ", start_train, end_train)
 
-        if _ % 1000 == 0:
-            print(loss)
+            optimizer.zero_grad() #delete gradients to not accumulate so many values
+            outputs = model(X_train[start_train:end_train])
+            loss = loss_fn(outputs, y_train[start_train:end_train]) #between prediction and real one
+            loss.backward() #backpropagation
+            optimizer.step() #(into the right/next direction)
 
-            model.eval()
-            with torch.no_grad():
-                val_logits = model(X_val)
-                val_loss = loss_fn(val_logits, y_val)
-            print(f"Epoch {_:5d} | train_loss={loss.item():.4f} | val_loss={val_loss.item():.4f}")
+            if _ % 1000 == 0:
+                print(loss)
+
+                model.eval()
+                with torch.no_grad():
+                    for start_val in range(0, end_val, batch_size):
+                        print("X_val: ", start_val, end_val)
+                        val_logits = model(X_val[start_val:end_val])
+                        val_loss = loss_fn(val_logits, y_val[start_val:end_val])
+                print(f"Epoch {_:5d} | train_loss={loss.item():.4f} | val_loss={val_loss.item():.4f}")
         
     
 df = pl.read_csv("student_exam_data.csv")
@@ -102,3 +113,6 @@ with torch.no_grad():
     print(precision_score(y_test.cpu().numpy(), prediction_te))
 
     # we are now missing the opportunity to save the model that created for example the lowest val_loss, to use for prediction of test
+
+    brier_train = (prediction_tr -1)**2
+    print(brier_train)
