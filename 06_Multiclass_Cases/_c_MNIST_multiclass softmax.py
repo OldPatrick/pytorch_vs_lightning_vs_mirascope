@@ -1,7 +1,14 @@
 # Softmax helps larger values stand out 
 # helps that the value always stays positive
-# cross entropyloss comes directly with softmax
+# transforms "probabilities" that sum up to 1
+# saying probabilities is a hard way, because a new initialization of the network will give new "probabilities"
+# probabilities always sound like a hard ground truth which they arent here
+# cross entropyloss comes directly with softmax, but we need it to apply at the end for inference prediction task
 
+# we also add more layers, more layers add complexity, complexity can lead to overfitting,
+# double descent can however apprea, meaning that if we add more complexity, the test error may reduce again
+
+#however complexity can at first lead to the idea that the model is useless patterns for the real task
 import torch
 import torchvision
 from torch import nn
@@ -29,7 +36,6 @@ for X, y in train_dataloader:
     print(X.shape)
     print(y.shape)
     X = X.reshape(-1, 784)
-    y = nn.functional.one_hot(y, num_classes=10).type(dtype=torch.float32)
     print(X.shape)
     print(y.shape)
     break
@@ -37,7 +43,9 @@ for X, y in train_dataloader:
 model = nn.Sequential(
     nn.Linear(784, 100),
     nn.ReLU(),
-    nn.Linear(100, 10)
+    nn.Linear(100, 50),
+    nn.ReLU(),
+    nn.Linear(50, 10)
 )
 
 loss_fn = nn.CrossEntropyLoss() # makes sense if a target may belong to several classes
@@ -47,7 +55,6 @@ for iter in range(10):
     total_loss = 0
     for X, y in train_dataloader:
         X = X.reshape(-1, 784)
-        y = nn.functional.one_hot(y, num_classes=10).type(dtype=torch.float32)
         optimizer.zero_grad() #das MUSS kurz vor dem model kommen und muss für jeden bacth zurückgesetzt werden un nicht nach der epoche, sonst sammelt sich der gradient einfach an
         outputs = model(X)
         loss = loss_fn(outputs, y)
@@ -65,14 +72,8 @@ with torch.no_grad():
     total = 0
     for X, y in test_dataloader:
         X = X.reshape((-1, 784))
-        # y = F.one_hot(y, num_classes=10).type(torch.float32)
-
         outputs = nn.functional.softmax(model(X), dim=1)
         print(outputs.sum(dim=1))
-        #print(y)
-        #print(outputs.max(dim=1).indices)
-        #print(outputs)
-        #break
         correct_pred = (y == outputs.max(dim=1).indices)
         total+=correct_pred.size(0)
         accurate+=correct_pred.type(torch.int).sum().item()
